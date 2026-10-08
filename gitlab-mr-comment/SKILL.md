@@ -1,6 +1,6 @@
 ---
 name: gitlab-mr-comment
-description: Posts a review thread (bug) or plain comment (nit) on a GitLab merge request in the user's fixed review pattern. Visual issues get a screenshot; code-only issues are anchored to the exact lines with a short technical explanation. Use when the user asks to open a thread, flag an adjustment, leave a review comment, or report a visual or code issue on an MR.
+description: Posts a review thread (bug) or plain comment (nit) on a GitLab merge request in the user's fixed review pattern. Visual issues get a screenshot; whenever a changed line explains the issue, the note is attached to that exact line. Returns the link to the note. Use when the user asks to open a thread, flag an adjustment, leave a review comment, or report a visual or code issue on an MR.
 argument-hint: <iid?> <bug|nit?> <description of the adjustment>
 ---
 
@@ -21,16 +21,32 @@ Channel: **thread** by default, **comment** only for `nit`.
 
 ## 2. Classify
 
-| Kind | Reached by | Screenshot | Anchor | Tone |
-| --- | --- | --- | --- | --- |
-| **Visual** | Looking at a page | Required | none | Plain, non-technical |
-| **Behavior** | Using the feature or the MR: wrong result, conflict, CI failure | none | none | Plain, non-technical |
-| **Code-only** | Reading code only: a bug or smell no user can see | none | exact lines | Light technical |
+| Kind | Reached by | Screenshot | Tone |
+| --- | --- | --- | --- |
+| **Visual** | Looking at a page | Required | Plain, non-technical |
+| **Behavior** | Using the feature or the MR: wrong result, conflict, CI failure | none | Plain, non-technical |
+| **Code-only** | Reading code only: a bug or smell no user can see | none | Light technical |
 
-- Visual → take a screenshot (step 3) and upload it. It gives `$MD`.
-- Code-only → get `FILE` and `LINE` from `glab mr diff $IID`: the new-file line of a changed line. If the problem is on an unchanged line, anchor to the nearest changed one and name the real line in the text.
+## 3. Attach to code lines
 
-## 3. Screenshot (Visual only)
+Attach the note to code **whenever a changed line explains the issue**, for every kind: the CSS rule behind a misalignment, the function behind a wrong result, the line behind a smell. Code-only issues always have one. A merge conflict or a CI failure has none: post it unattached.
+
+List the added lines with their new-file line numbers, then pick `FILE` and `LINE`:
+
+```
+glab mr diff $IID --color=never | awk '/^\+\+\+ /{f=substr($2,3); next} /^@@/{split($3,a,/[,+]/); n=a[2]-1; next} /^-/{next} /^\\/{next} {n++} /^\+/{print f":"n": "substr($0,2)}'
+```
+
+Read the diff refs once; the post and the nit link use them:
+
+```
+read BASE START HEAD < <(glab api "projects/$PROJ/merge_requests/$IID" \
+  | python3 -c "import sys,json;r=json.load(sys.stdin)['diff_refs'];print(r['base_sha'],r['start_sha'],r['head_sha'])")
+```
+
+If the real problem is on an unchanged line, use the nearest changed line and name the real one in the text. Use one line, the first of the block. If no changed line fits, post unattached.
+
+## 4. Screenshot (Visual only)
 
 Capture with whatever tool can do it (browser tool, screenshot script). Save inside the workspace root, e.g. `./.review-shots/x.png`.
 
@@ -50,7 +66,7 @@ MD=$(curl -s -X POST "https://gitlab.com/api/v4/projects/$PROJ/uploads" \
 
 Self-hosted: swap `gitlab.com` for the remote's host in both places.
 
-## 4. Body
+## 5. Body
 
 1. Opening, verbatim: `@HANDLE, consegue dar uma olhada nesse ajuste:`
 2. Summary:
@@ -58,30 +74,31 @@ Self-hosted: swap `gitlab.com` for the remote's host in both places.
    - Code-only: two short sentences. First the **cause**: what is wrong, in plain words (what shares, overrides or misses what). Then the **effect**: what breaks because of it. Name only the one or two identifiers where the cause lives, in backticks. Do not list symptoms, every affected file, or the mechanism step by step. The reader must understand the problem without opening the code. One finding per thread.
      Example: "Os trabalhos usam a mesma taxonomia `category` dos posts do Journal. Com `category.php`, toda página de categoria passa a mostrar trabalhos, inclusive as categorias do Journal."
 3. `$MD` on its own line (Visual only).
+4. For a `nit` attached to code: the line link on its own line, `[FILE:LINE](${MR_URL%/-/merge_requests/*}/-/blob/$HEAD/$FILE#L$LINE)`.
 
 Never: emoji, greeting, `Bug:`/`Nit:` labels, code at the start, suggestions or solutions, a list of symptoms, more than two identifiers, more than one finding per thread.
 
 If the draft names what breaks before saying why it breaks, rewrite it cause first.
 
-## 5. Post
+## 6. Post
 
 Capture the response in `RESP`:
 
 ```
-# thread: Visual or Behavior
-RESP=$(glab api "projects/$PROJ/merge_requests/$IID/discussions" -f "body=$BODY")
-
-# thread: Code-only
-read BASE START HEAD < <(glab api "projects/$PROJ/merge_requests/$IID" \
-  | python3 -c "import sys,json;r=json.load(sys.stdin)['diff_refs'];print(r['base_sha'],r['start_sha'],r['head_sha'])")
+# thread, attached to a line (preferred)
 RESP=$(glab api "projects/$PROJ/merge_requests/$IID/discussions" \
   -f "body=$BODY" -f "position[position_type]=text" \
   -f "position[base_sha]=$BASE" -f "position[start_sha]=$START" -f "position[head_sha]=$HEAD" \
   -f "position[new_path]=$FILE" -f "position[old_path]=$FILE" -F "position[new_line]=$LINE")
 
-# comment: nit, any kind (Code-only: put FILE:LINE in the text)
+# thread, unattached
+RESP=$(glab api "projects/$PROJ/merge_requests/$IID/discussions" -f "body=$BODY")
+
+# comment (nit): the API cannot attach a plain comment to a line, so it carries the line link
 RESP=$(glab api "projects/$PROJ/merge_requests/$IID/notes" -f "body=$BODY")
 ```
+
+If the attached call fails (the line is not in the diff), post unattached and keep going.
 
 Build the link (works for a thread and a comment):
 
@@ -90,6 +107,6 @@ NOTE_ID=$(echo "$RESP" | python3 -c "import sys,json;d=json.load(sys.stdin);prin
 echo "$MR_URL#note_$NOTE_ID"
 ```
 
-## 6. Output
+## 7. Output
 
 Always print the note link, and nothing else. On a failed command, print the error instead.

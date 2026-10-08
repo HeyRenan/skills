@@ -8,6 +8,7 @@
       "Classifies as Visual without asking",
       "Takes a tight element screenshot at 1440x900, not a full-page one",
       "Uploads with the Bearer token recipe and gets markdown back",
+      "Attaches the thread to the changed CSS line that causes the misalignment when one exists in the diff",
       "Posts a thread whose body starts with the verbatim opening, has a plain non-technical summary and the image on its own line",
       "Prints the link to the posted note (MR web_url#note_<id>) and nothing else"
     ]
@@ -19,6 +20,7 @@
     "query": "/gitlab-mr-comment 42 merge conflict in app.js",
     "expected_behavior": [
       "Classifies as Behavior: no screenshot and no anchor",
+      "Posts unattached because a merge conflict has no changed line that explains it",
       "Posts a general thread with the verbatim opening and a non-technical summary",
       "Uses no emoji, labels, greeting or suggestions",
       "Prints the link to the posted note (MR web_url#note_<id>) and nothing else"
@@ -32,6 +34,7 @@
     "expected_behavior": [
       "Classifies as Code-only: no screenshot",
       "Finds the file and new-file line number from the MR diff",
+      "Falls back to an unattached thread if the attached call fails",
       "Posts an inline thread with position fields (base, start, head sha, paths, new_line)",
       "Body has the verbatim opening, then the cause in one sentence and its effect in one sentence, with one or two identifiers in backticks",
       "Does not list symptoms or affected files, has no code block and no suggested fix",
@@ -47,6 +50,7 @@
     "expected_behavior": [
       "Finds the MR id from the current branch",
       "Classifies as Visual and takes a screenshot",
+      "Includes a blob link to FILE:LINE in the body when a changed line explains the issue, since a plain comment cannot be attached to a line",
       "Posts with glab mr note instead of a discussion thread",
       "Prints the link to the posted note (MR web_url#note_<id>) and nothing else"
     ]
