@@ -1,0 +1,27 @@
+[
+  {
+    "skills": ["lp-export"],
+    "query": "/lp-export https://example.rdstation.com.br/lp-x o-segredo-x",
+    "expected_behavior": [
+      "Asks for NAME and the submit text before registering anything in the CRM if they are missing",
+      "Reads adapt.md before editing and puts the GTM script at the top of head and the noscript right after body",
+      "Fetches the favicon live from the main site instead of copying the export's",
+      "Registers the slug in both lists of scripts-footer.php and the NAME in integracao-form-crm.php"
+    ]
+  },
+  {
+    "skills": ["lp-export"],
+    "query": "/lp-export when testing the form submission",
+    "expected_behavior": [
+      "Never submits the form in the browser with a real name",
+      "Calls enqueue_lead directly with a name containing teste and checks origin and PILOTO unit"
+    ]
+  },
+  {
+    "skills": ["lp-export"],
+    "query": "/lp-export when the thank-you CTA points to another campaign",
+    "expected_behavior": [
+      "Does not invent a destination: asks the task owner or lists it as pending in the final report"
+    ]
+  }
+]
