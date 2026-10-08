@@ -1,0 +1,30 @@
+[
+  {
+    "skills": ["ui-check"],
+    "query": "/ui-check <url> the primary button is visible, 48px tall, and has no console errors",
+    "expected_behavior": [
+      "Lists the checks before acting",
+      "Verifies size and visibility with a script or page read, with no screenshot",
+      "Checks console errors only",
+      "Reports one line per check with measured values"
+    ]
+  },
+  {
+    "skills": ["ui-check"],
+    "query": "/ui-check <url> the card grid is not overlapping on mobile and desktop",
+    "expected_behavior": [
+      "Sets mobile then desktop viewports and resets the viewport at the end",
+      "Takes at most one small, cropped, reduced-scale screenshot per viewport",
+      "Does not take a full-page screenshot",
+      "Does not read the screenshot back with a file reader"
+    ]
+  },
+  {
+    "skills": ["ui-check"],
+    "query": "/ui-check <url> after fixing a failed alignment check",
+    "expected_behavior": [
+      "Re-runs only the failed check",
+      "Does not re-check items that already passed"
+    ]
+  }
+]
