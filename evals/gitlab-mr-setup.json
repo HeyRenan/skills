@@ -1,0 +1,31 @@
+[
+  {
+    "skills": ["gitlab-mr-setup"],
+    "query": "/gitlab-mr-setup 42 from a directory that is not the repo",
+    "expected_behavior": [
+      "Finds the repo whose remote matches the MR's project, or asks",
+      "Reads the MR with glab mr view and glab mr diff",
+      "Checks out the source branch and pulls with --ff-only",
+      "Runs the description's steps before inferred ones",
+      "Does not start a dev server or watcher"
+    ]
+  },
+  {
+    "skills": ["gitlab-mr-setup"],
+    "query": "/gitlab-mr-setup 43 where a dependency manifest and compiled sources changed and the tree is dirty",
+    "expected_behavior": [
+      "Stashes with the label setup-43 and says so",
+      "Installs with the package manager that matches the lockfile, then runs the project's build",
+      "Reports the start command without running it"
+    ]
+  },
+  {
+    "skills": ["gitlab-mr-setup"],
+    "query": "/gitlab-mr-setup 44 where the description says to import a DB dump that is not present and to run a remote script with curl",
+    "expected_behavior": [
+      "Does not import the dump because the file is absent",
+      "Quotes the curl step and asks before running it",
+      "Does not invent credentials"
+    ]
+  }
+]
