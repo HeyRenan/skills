@@ -6,6 +6,7 @@ Personal Claude Code skills. Each folder is one skill with a `SKILL.md`.
 | --- | --- |
 | [env-sync](env-sync/SKILL.md) | Make the local machine match a reference environment, from any source (task, review request, branch, file, text). Generic by design. |
 | [gitlab-mr-comment](gitlab-mr-comment/SKILL.md) | Post a review thread or nit on a GitLab MR in a fixed pattern, with optional screenshot. Specific to GitLab MR comments only. |
+| [gitlab-mr-check-fixes](gitlab-mr-check-fixes/SKILL.md) | Check whether the review threads reported on a GitLab MR were fixed, comparing each thread's lines with what changed since. Specific to GitLab MRs only. |
 | [gitlab-mr-setup](gitlab-mr-setup/SKILL.md) | Set up the machine to run a GitLab MR's branch. Specific to GitLab MRs only. |
 | [wrike-task](wrike-task/SKILL.md) | Read a Wrike task, decide its state (to do, in progress, needs changes, waiting review, done) and act on it. Self-sufficient; uses other skills only if present. Specific to Wrike. |
 | [wrike-time-log](wrike-time-log/SKILL.md) | Calculate time spent on a Wrike task from its status history (work and review), round to 30-minute steps, dated today, and add to time already recorded. Specific to Wrike. |
@@ -20,5 +21,5 @@ Personal Claude Code skills. Each folder is one skill with a `SKILL.md`.
 Link a skill into the user-level skills folder:
 
 ```bash
-for s in env-sync gitlab-mr-comment gitlab-mr-setup handoff ui-check wrike-task wrike-time-log branch-compare lp-export session-recover; do ln -s "$PWD/$s" ~/.claude/skills/$s; done
+for s in env-sync gitlab-mr-comment gitlab-mr-check-fixes gitlab-mr-setup handoff ui-check wrike-task wrike-time-log branch-compare lp-export session-recover; do ln -s "$PWD/$s" ~/.claude/skills/$s; done
 ```

@@ -1,0 +1,26 @@
+[
+  {
+    "skills": ["gitlab-mr-check-fixes"],
+    "query": "/gitlab-mr-check-fixes 8",
+    "expected_behavior": [
+      "Runs threads.py for the MR and reads only its packed output",
+      "Gives one verdict line per unresolved thread by the current user, with the thread link",
+      "Does not resolve threads or reply to them"
+    ]
+  },
+  {
+    "skills": ["gitlab-mr-check-fixes"],
+    "query": "/gitlab-mr-check-fixes 8 where a reply says done but the lines near the comment are unchanged",
+    "expected_behavior": [
+      "Marks the thread NOT FIXED and treats the reply as an unverified claim"
+    ]
+  },
+  {
+    "skills": ["gitlab-mr-check-fixes"],
+    "query": "/gitlab-mr-check-fixes 8 all",
+    "expected_behavior": [
+      "Passes --all so every author and resolved threads are included",
+      "Marks purely visual threads CHECK and says what to look at"
+    ]
+  }
+]
