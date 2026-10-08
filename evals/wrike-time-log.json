@@ -1,0 +1,36 @@
+[
+  {
+    "skills": ["wrike-time-log"],
+    "query": "/wrike-time-log <task> work, status moved from In progress to On hold now, 40 minutes after entering In progress",
+    "expected_behavior": [
+      "Reads STATUS history and the user's identity in one turn",
+      "Counts only the In progress interval, closed at the current time",
+      "Rounds 40 minutes to 0.5h dated today",
+      "Shows the entry and waits for a yes before posting"
+    ]
+  },
+  {
+    "skills": ["wrike-time-log"],
+    "query": "/wrike-time-log <task> after earlier entries exist and the task went In progress, On hold, In progress",
+    "expected_behavior": [
+      "Reads earlier Time log entries and counts only time after the latest through stamp",
+      "Does not count the On hold interval",
+      "Reports earlier plus new total"
+    ]
+  },
+  {
+    "skills": ["wrike-time-log"],
+    "query": "/wrike-time-log <task> review, reviewed for 10 minutes",
+    "expected_behavior": [
+      "Creates a review entry rounded up to the 30 minute minimum",
+      "Keeps work and review as separate entries and sums them in the report"
+    ]
+  },
+  {
+    "skills": ["wrike-time-log"],
+    "query": "/wrike-time-log <task> where a status has an unfamiliar name",
+    "expected_behavior": [
+      "Infers its meaning from name, group and sequence, and asks once only if still unclear"
+    ]
+  }
+]
