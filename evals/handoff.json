@@ -1,0 +1,28 @@
+[
+  {
+    "skills": ["handoff"],
+    "query": "/handoff after a long conversation with many detours",
+    "expected_behavior": [
+      "Writes handoff-<topic>-<YYYYMMDD-HHmm>.txt with a short lowercase topic",
+      "Contains only the current state and what the next chat needs, with no detours or superseded content",
+      "Uses uppercase labels, no markdown, and omits empty sections without writing N/A",
+      "Each NEXT item is actionable without extra context",
+      "Prints only the file path"
+    ]
+  },
+  {
+    "skills": ["handoff"],
+    "query": "/handoff in a conversation on any topic that is not code",
+    "expected_behavior": [
+      "Uses the same sections and format",
+      "Does not assume a repo, branch or any specific tool"
+    ]
+  },
+  {
+    "skills": ["handoff"],
+    "query": "/handoff when an earlier decision was replaced midway",
+    "expected_behavior": [
+      "DECISIONS holds only the one in force and why"
+    ]
+  }
+]
