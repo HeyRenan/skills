@@ -1,14 +1,14 @@
 ---
 name: wrike-time-log
-description: Calculates the time spent on a Wrike task from its status history and records it, rounded to 30-minute steps and dated today. Counts work time and review time, and adds to time already recorded. Use when the user hands a task over for review, completes it, reviews it, or asks to log, add or calculate time on a Wrike task.
+description: Calculates the time spent on a Wrike task from its status history and adds it to the task's Duration field, rounded to 30-minute steps. Counts work time and review time, and always adds to the duration already on the task, never replaces it. Use when the user hands a task over for review, completes it, reviews it, or asks to log, add or calculate time on a Wrike task.
 argument-hint: <wrike link | task id> [work|review] [duration or start time]
 ---
 
-Calculate and record the time spent on the Wrike task in `$ARGUMENTS`. Understand the history before you count anything.
+Calculate the time spent on the Wrike task in `$ARGUMENTS` and add it to the task's **Duration** field. Understand the history before you count anything.
 
 ## 1. Load
 
-One `ToolSearch` loads the Wrike tools you need. Build the id as `w:itm:N` from `open.htm?id=N`. In one turn, fetch: task details, status history (`requestedChanges: ["STATUS"]`), comments, and the current user (`get_users` with `me=true`). Get the current time with `date +%Y-%m-%dT%H:%M:%S%z`.
+One `ToolSearch` loads the Wrike tools you need, including `update_items`. Build the id as `w:itm:N` from `open.htm?id=N`. In one turn, fetch: task details, history (`requestedChanges: ["STATUS", "DURATION", "START_DATE"]`), comments, and the current user (`get_users` with `me=true`). Get the current time with `date +%Y-%m-%dT%H:%M:%S%z`.
 
 ## 2. Understand the statuses
 
@@ -30,31 +30,29 @@ If a status is not in the table, infer its meaning from its name, workflow group
 
 **Review time** = time the user spent reviewing: from when the review started to now. Default start: the first message of this conversation. Use a duration or start time the user gave in `$ARGUMENTS` instead if present. If you cannot tell, ask once.
 
-**Already recorded.** Do not count time twice:
-- If a native time-log tool exists, read its entries and count only what is not covered.
-- Otherwise read the task comments for earlier entries written by this skill (format in step 5). Count only time after the latest `through` stamp.
+**Current duration.** The task details do not show it. Read it from the latest `DURATION` change in the history (`newValue.durationInMinutes`); no change means no duration yet (0). It already holds the time of earlier work, so you add to it and never replace it.
+
+**Do not count time twice.** If the current user already changed the `DURATION` after an interval started, count only the part after that change.
 
 ## 4. Round
 
 - Round each entry (work, review) to the nearest 30 minutes. Exactly 15 past rounds up.
 - Minimum 30 minutes per entry. Zero time means no entry.
-- Entry date is **today**, even if the work spanned several days.
 
 Examples: 10 min → 0.5h, 40 min → 0.5h, 50 min → 1h, 1h20 → 1.5h.
 
 ## 5. Record
 
-Show one line per entry (type, hours, date, intervals used) and wait for the user's yes. Never post before that.
+Show the sum and wait for the user's yes. Never write before that. Example: `current 2h + review 0.5h = 2.5h`.
 
-- **Native time-log tool, if any**: add the entry with today's date and the rounded hours. Existing time stays; this adds to it.
-- **Otherwise** post one comment per entry, exactly this shape, so the next run can sum it:
+New duration in minutes = current duration + all rounded entries. Write it with `update_items`, `dates: { startDate, duration }`:
 
-  `Time log | 2026-10-08 | work | 1.5h | through 2026-10-08T14:30:00-0300`
+- Pass the task's current start date-time (latest `START_DATE` value in the history) as `startDate`. Do not pass only a date, because that can move the start time.
+- Never pass `duration` alone with a different start, and never send the new entry alone: a lone 30 would overwrite the existing 2h.
+- Wrike moves the due date to follow the duration. That is expected.
 
-  Type is `work` or `review`. `through` is the end of the last interval counted.
-
-Do not change the task's status or dates. If the user is handing over or completing, mention that the status change is theirs to ask for.
+Do not change the task's status, assignees or description. If the user is handing over or completing, mention that the status change is theirs to ask for. Do not post a comment unless the user asks for one.
 
 ## 6. Report
 
-Entries recorded, total time on the task so far (earlier entries plus new), and anything you could not determine.
+Previous duration, time added, new duration, and anything you could not determine. Check the new value in the history (`DURATION` change), not in the task details.
