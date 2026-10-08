@@ -1,0 +1,28 @@
+[
+  {
+    "skills": ["session-recover"],
+    "query": "/session-recover yesterday we were fixing the posts saving bug",
+    "expected_behavior": [
+      "Runs recover.py list with a few keywords instead of reading transcripts directly",
+      "Picks the session whose first and last request match, or shows 2 to 3 candidates and asks",
+      "Runs recover.py extract once for the chosen session",
+      "Checks git status and recent commits in the session's directory",
+      "Ends with a brief of at most 15 lines and waits before editing"
+    ]
+  },
+  {
+    "skills": ["session-recover"],
+    "query": "/session-recover @handoff-project-20260928-1748.txt",
+    "expected_behavior": [
+      "Reads the handoff file and does not search transcripts",
+      "Verifies the repo state before presenting the brief"
+    ]
+  },
+  {
+    "skills": ["session-recover"],
+    "query": "/session-recover when the transcript claims a fix was committed but git log does not show it",
+    "expected_behavior": [
+      "Lists the claim under Open as unconfirmed instead of Done"
+    ]
+  }
+]
