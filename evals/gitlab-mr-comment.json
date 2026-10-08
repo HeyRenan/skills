@@ -9,7 +9,7 @@
       "Takes a tight element screenshot at 1440x900, not a full-page one",
       "Uploads with the Bearer token recipe and gets markdown back",
       "Posts a thread whose body starts with the verbatim opening, has a plain non-technical summary and the image on its own line",
-      "Prints nothing"
+      "Prints the link to the posted note (MR web_url#note_<id>) and nothing else"
     ]
   },
   {
@@ -20,7 +20,8 @@
     "expected_behavior": [
       "Classifies as Behavior: no screenshot and no anchor",
       "Posts a general thread with the verbatim opening and a non-technical summary",
-      "Uses no emoji, labels, greeting or suggestions"
+      "Uses no emoji, labels, greeting or suggestions",
+      "Prints the link to the posted note (MR web_url#note_<id>) and nothing else"
     ]
   },
   {
@@ -34,7 +35,8 @@
       "Posts an inline thread with position fields (base, start, head sha, paths, new_line)",
       "Body has the verbatim opening, then the cause in one sentence and its effect in one sentence, with one or two identifiers in backticks",
       "Does not list symptoms or affected files, has no code block and no suggested fix",
-      "Posts one finding per thread"
+      "Posts one finding per thread",
+      "Prints the link to the posted note (MR web_url#note_<id>) and nothing else"
     ]
   },
   {
@@ -45,7 +47,8 @@
     "expected_behavior": [
       "Finds the MR id from the current branch",
       "Classifies as Visual and takes a screenshot",
-      "Posts with glab mr note instead of a discussion thread"
+      "Posts with glab mr note instead of a discussion thread",
+      "Prints the link to the posted note (MR web_url#note_<id>) and nothing else"
     ]
   }
 ]

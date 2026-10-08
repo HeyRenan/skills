@@ -14,6 +14,7 @@ User input: $ARGUMENTS
 IID=<from input, else the current branch's MR: glab mr view>
 PROJ=$(git remote get-url origin | sed -E 's#^(git@[^:]+:|https?://[^/]+/)##; s#\.git$##; s#/#%2F#g')
 HANDLE=@<author username from: glab mr view $IID>
+MR_URL=$(glab api "projects/$PROJ/merge_requests/$IID" | python3 -c "import sys,json;print(json.load(sys.stdin)['web_url'])")
 ```
 
 Channel: **thread** by default, **comment** only for `nit`.
@@ -64,22 +65,31 @@ If the draft names what breaks before saying why it breaks, rewrite it cause fir
 
 ## 5. Post
 
+Capture the response in `RESP`:
+
 ```
 # thread: Visual or Behavior
-glab api "projects/$PROJ/merge_requests/$IID/discussions" -f "body=$BODY"
+RESP=$(glab api "projects/$PROJ/merge_requests/$IID/discussions" -f "body=$BODY")
 
 # thread: Code-only
 read BASE START HEAD < <(glab api "projects/$PROJ/merge_requests/$IID" \
   | python3 -c "import sys,json;r=json.load(sys.stdin)['diff_refs'];print(r['base_sha'],r['start_sha'],r['head_sha'])")
-glab api "projects/$PROJ/merge_requests/$IID/discussions" \
+RESP=$(glab api "projects/$PROJ/merge_requests/$IID/discussions" \
   -f "body=$BODY" -f "position[position_type]=text" \
   -f "position[base_sha]=$BASE" -f "position[start_sha]=$START" -f "position[head_sha]=$HEAD" \
-  -f "position[new_path]=$FILE" -f "position[old_path]=$FILE" -F "position[new_line]=$LINE"
+  -f "position[new_path]=$FILE" -f "position[old_path]=$FILE" -F "position[new_line]=$LINE")
 
 # comment: nit, any kind (Code-only: put FILE:LINE in the text)
-glab mr note $IID -m "$BODY"
+RESP=$(glab api "projects/$PROJ/merge_requests/$IID/notes" -f "body=$BODY")
+```
+
+Build the link (works for a thread and a comment):
+
+```
+NOTE_ID=$(echo "$RESP" | python3 -c "import sys,json;d=json.load(sys.stdin);print((d.get('notes') or [d])[0]['id'])")
+echo "$MR_URL#note_$NOTE_ID"
 ```
 
 ## 6. Output
 
-Nothing, unless the user asks or a command failed: then only the note link or the error.
+Always print the note link, and nothing else. On a failed command, print the error instead.
