@@ -1,0 +1,36 @@
+[
+  {
+    "skills": ["wrike-task"],
+    "query": "/wrike-task <link to a task in an active status with no code reference>",
+    "expected_behavior": [
+      "Loads Wrike tools with one ToolSearch and fetches details, comments and children in the same turn",
+      "Classifies as To do and writes a brief of at most 15 lines before reading any code",
+      "Reads only files the task names, and makes the first edit within about 20 turns"
+    ]
+  },
+  {
+    "skills": ["wrike-task"],
+    "query": "/wrike-task <link to a task whose merge request is open with no unresolved threads and status in review>",
+    "expected_behavior": [
+      "Classifies as Waiting review with the deciding sign stated",
+      "Does not edit code",
+      "Reports and offers a review or a nudge without posting anything unasked"
+    ]
+  },
+  {
+    "skills": ["wrike-task"],
+    "query": "/wrike-task <link to a task whose merge request has unresolved reviewer threads>",
+    "expected_behavior": [
+      "Classifies as Needs changes",
+      "Checks out the request branch and addresses only the feedback",
+      "Asks before commenting on the task or the request, or changing status"
+    ]
+  },
+  {
+    "skills": ["wrike-task"],
+    "query": "/wrike-task <link to a task in a completed status whose merge request is merged>",
+    "expected_behavior": [
+      "Classifies as Done, takes no action, and reports it in one short brief"
+    ]
+  }
+]
