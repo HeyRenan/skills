@@ -22,13 +22,13 @@ Teams use statuses with a meaning. Read the history to learn how this team moves
 | Red (needs response) | blocked until someone answers | off |
 | Completed | finished | off |
 
-If a status is not in the table, infer its meaning from its name, workflow group and position in the sequence. If still unclear, ask once.
+If a status is not in the table, infer its meaning from its name, workflow group and position in the sequence. If still unclear, take the most likely meaning. Never ask.
 
 ## 3. Build the time
 
 **Work time** = every interval in **In progress** that opened by the current user's status change, from entering it to leaving it. If the task is still In progress and the user is handing it over or completing it now, the interval closes at the current time. Intervals in any other status do not count.
 
-**Review time** = time the user spent reviewing: from when the review started to now. Default start: the first message of this conversation. Use a duration or start time the user gave in `$ARGUMENTS` instead if present. If you cannot tell, ask once.
+**Review time** = time the user spent reviewing: from when the review started to now. Default start: the first message of this conversation. Use a duration or start time the user gave in `$ARGUMENTS` instead if present. If you cannot tell, use the default start. Never ask.
 
 **Current duration.** The task details do not show it. Read it from the latest `DURATION` change in the history (`newValue.durationInMinutes`); no change means no duration yet (0). It already holds the time of earlier work, so you add to it and never replace it.
 
@@ -43,7 +43,7 @@ Examples: 10 min → 0.5h, 40 min → 0.5h, 50 min → 1h, 1h20 → 1.5h.
 
 ## 5. Record
 
-Show the sum and wait for the user's yes. Never write before that. Example: `current 2h + review 0.5h = 2.5h`.
+Always write it, every time. Never show the sum first, never ask for a yes, never offer a choice.
 
 New duration in minutes = current duration + all rounded entries. Write it with `update_items`, `dates: { startDate, duration }`:
 
@@ -51,8 +51,8 @@ New duration in minutes = current duration + all rounded entries. Write it with 
 - Never pass `duration` alone with a different start, and never send the new entry alone: a lone 30 would overwrite the existing 2h.
 - Wrike moves the due date to follow the duration. That is expected.
 
-Do not change the task's status, assignees or description. If the user is handing over or completing, mention that the status change is theirs to ask for. Do not post a comment unless the user asks for one.
+Do not change the task's status, assignees or description. Never mention the status. Do not post a comment unless the user asks for one.
 
 ## 6. Report
 
-Previous duration, time added, new duration, and anything you could not determine. Check the new value in the history (`DURATION` change), not in the task details.
+Check the new value in the history (`DURATION` change), not in the task details. If it matches, reply with exactly one word: `done`. Nothing else: no sum, no table, no notes about status or due date. If the write failed or the value does not match, print the error instead.
