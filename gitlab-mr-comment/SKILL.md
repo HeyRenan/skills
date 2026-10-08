@@ -68,6 +68,12 @@ Self-hosted: swap `gitlab.com` for the remote's host in both places.
 
 ## 5. Body
 
+Priority check, before writing:
+1. Say in one sentence what the reader sees or what is missing on the page. Use the plainest fact, such as "only 1 category renders".
+2. Add the cause only if it fits one more short sentence.
+3. Never lead with a side detail (sort order, naming, internals) when a bigger fact exists.
+4. If you cannot say what the reader sees, the finding is probably a nit. Post it as a comment or drop it.
+
 1. Opening, verbatim: `@HANDLE, consegue dar uma olhada nesse ajuste:`
 2. Summary:
    - Visual, Behavior: one or two plain sentences, one keyword.
