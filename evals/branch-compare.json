@@ -1,0 +1,27 @@
+[
+  {
+    "skills": ["branch-compare"],
+    "query": "/branch-compare main in a Node project that has no .branch-compare.json",
+    "expected_behavior": [
+      "Creates the config from references/config.md using the project's own serve and build commands",
+      "Picks key pages and hides dynamic elements instead of using a default",
+      "Runs the script and reports its summary lines and the report path",
+      "Does not take screenshots itself or open images"
+    ]
+  },
+  {
+    "skills": ["branch-compare"],
+    "query": "/branch-compare https://staging.example.com http://localhost:3000",
+    "expected_behavior": [
+      "Uses urls mode with the two URLs",
+      "Reports DIFF, ERR+ and TEXT lines from the summary"
+    ]
+  },
+  {
+    "skills": ["branch-compare"],
+    "query": "/branch-compare after the first run failed with Cannot find package 'playwright'",
+    "expected_behavior": [
+      "Runs npm install --prefix ~/.claude/skills/branch-compare and retries"
+    ]
+  }
+]
